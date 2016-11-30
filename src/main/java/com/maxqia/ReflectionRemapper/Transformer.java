@@ -1,5 +1,7 @@
 package com.maxqia.ReflectionRemapper;
 
+import java.util.ListIterator;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -46,10 +48,10 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
         reader.accept(node, 0); // Visit using ClassNode
 
         for (MethodNode method : node.methods) { // Taken from SpecialSource
-            AbstractInsnNode insn = method.instructions.getFirst();
-            while (insn != null) {
-                switch (insn.getOpcode())
-                {
+            ListIterator<AbstractInsnNode> insnIterator = method.instructions.iterator();
+            while (insnIterator.hasNext()) {
+                AbstractInsnNode insn = insnIterator.next();
+                switch (insn.getOpcode()) {
                     case Opcodes.INVOKEVIRTUAL:
                         remapVirtual(insn);
                         break;
@@ -58,8 +60,6 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
                         remapForName(insn);
                         break;
                 }
-
-                insn = insn.getNext();
             }
         }
 
