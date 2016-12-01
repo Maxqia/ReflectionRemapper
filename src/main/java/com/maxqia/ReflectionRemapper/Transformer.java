@@ -1,10 +1,13 @@
 package com.maxqia.ReflectionRemapper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ListIterator;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -67,15 +70,24 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
         return writer.toByteArray();
     }
 
-    public static void remapVirtual(AbstractInsnNode insn) {
-        MethodInsnNode method = (MethodInsnNode) insn;
-        if (!method.owner.equals("java/lang/Class") || !method.name.equals("getField")) return;
-        method.owner = "com/maxqia/ReflectionRemapper/RemappedMethods";
-    }
-
     public static void remapForName(AbstractInsnNode insn) {
         MethodInsnNode method = (MethodInsnNode) insn;
         if (!method.owner.equals("java/lang/Class") || !method.name.equals("forName")) return;
         method.owner = "com/maxqia/ReflectionRemapper/RemappedMethods";
+    }
+
+    public static void remapVirtual(AbstractInsnNode insn) {
+        MethodInsnNode method = (MethodInsnNode) insn;
+        if (!method.owner.equals("java/lang/Class") || !method.name.equals("getField")) return;
+
+        Type returnType = Type.getReturnType(method.desc);
+
+        ArrayList<Type> args = new ArrayList<Type>();
+        args.add(Type.getObjectType(method.owner));
+        args.addAll(Arrays.asList(Type.getArgumentTypes(method.desc)));
+
+        method.setOpcode(Opcodes.INVOKESTATIC);
+        method.owner = "com/maxqia/ReflectionRemapper/RemappedMethods";
+        method.desc = Type.getMethodDescriptor(returnType, args.toArray(new Type[args.size()]));
     }
 }
