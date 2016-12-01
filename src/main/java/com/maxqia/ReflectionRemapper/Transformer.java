@@ -46,7 +46,6 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
         ClassReader reader = new ClassReader(code); // Turn from bytes into visitor
         ClassNode node = new ClassNode();
         reader.accept(node, 0); // Visit using ClassNode
-
         for (MethodNode method : node.methods) { // Taken from SpecialSource
             ListIterator<AbstractInsnNode> insnIterator = method.instructions.iterator();
             while (insnIterator.hasNext()) {
@@ -63,20 +62,20 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
             }
         }
 
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        ClassWriter writer = new ClassWriter(0/*ClassWriter.COMPUTE_FRAMES*/);
         node.accept(writer); // Convert back into bytes
         return writer.toByteArray();
     }
 
     public static void remapVirtual(AbstractInsnNode insn) {
         MethodInsnNode method = (MethodInsnNode) insn;
-        if (method.owner != "java/lang/Class" || method.name != "getField") return;
+        if (!method.owner.equals("java/lang/Class") || !method.name.equals("getField")) return;
         method.owner = "com/maxqia/ReflectionRemapper/RemappedMethods";
     }
 
     public static void remapForName(AbstractInsnNode insn) {
         MethodInsnNode method = (MethodInsnNode) insn;
-        if (method.owner != "java/lang/Class" || method.name != "forName") return;
+        if (!method.owner.equals("java/lang/Class") || !method.name.equals("forName")) return;
         method.owner = "com/maxqia/ReflectionRemapper/RemappedMethods";
     }
 }
