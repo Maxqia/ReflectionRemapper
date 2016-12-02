@@ -78,7 +78,19 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
 
     public static void remapVirtual(AbstractInsnNode insn) {
         MethodInsnNode method = (MethodInsnNode) insn;
-        if (!method.owner.equals("java/lang/Class") || !method.name.equals("getField")) return;
+        if (method.owner.equals("java/lang/Package") && method.name.equals("getName"))
+            System.out.println("getName");
+
+        if (!(method.owner.equals("java/lang/Package") && method.name.equals("getName")) &&
+                !(method.owner.equals("java/lang/Class") && (method.name.equals("getField") || method.name.equals("getName")))) {
+            return;
+        }
+
+        /*if (!(method.owner.equals("java/lang/Package") && method.name.equals("getName"))) {
+            return;
+        }*/
+
+        System.out.println("getName");
 
         Type returnType = Type.getReturnType(method.desc);
 
