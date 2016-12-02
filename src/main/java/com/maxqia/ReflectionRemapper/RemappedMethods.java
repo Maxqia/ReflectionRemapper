@@ -1,6 +1,7 @@
 package com.maxqia.ReflectionRemapper;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Map.Entry;
 
 import org.objectweb.asm.Type;
@@ -16,6 +17,31 @@ public class RemappedMethods {
     public static Field getField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
         return inst.getField(Transformer.remapper.mapFieldName(
                 Type.getInternalName(inst), name, null));
+    }
+
+    public static Method getMethod(Class<?> inst, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
+        return getDeclaredMethod(inst, name, parameterTypes);
+    }
+
+    public static Method getDeclaredMethod(Class<?> inst, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
+        String match = getName(inst).replace('.', '/') + "/" + name + " ";
+
+        try {
+            if (inst.getName().equals("net.minecraft.server.MinecraftServer") && name.equals("getServer"))
+                return Class.forName("org.spongepowered.common.SpongeImpl").getMethod("getServer");
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        for (Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
+            if (entry.getKey().startsWith(match)) {
+                System.out.println(entry.getValue());
+                return inst.getDeclaredMethod(entry.getValue(), parameterTypes);
+            }
+            //System.out.println(entry.getKey());
+        }
+        return inst.getDeclaredMethod(name, parameterTypes);
     }
 
     public static String getName(Class<?> inst) {
