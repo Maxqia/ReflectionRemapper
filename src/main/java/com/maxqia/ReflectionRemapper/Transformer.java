@@ -15,6 +15,8 @@ import org.objectweb.asm.tree.MethodNode;
 
 import net.md_5.specialsource.JarMapping;
 import net.md_5.specialsource.JarRemapper;
+import net.md_5.specialsource.provider.ClassLoaderProvider;
+import net.md_5.specialsource.provider.JointProvider;
 import net.md_5.specialsource.repo.RuntimeRepo;
 
 public class Transformer { // This is kinda like RemapperProcessor from SpecialSource
@@ -29,6 +31,10 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
     public static void loadMapping(JarMapping mapping) throws IllegalArgumentException {
             if (jarMapping != null) throw new IllegalArgumentException("Already loaded a mapping");
             jarMapping = mapping;
+            JointProvider provider = new JointProvider();
+            provider.add(new ClassInheritanceProvider());
+            provider.add(new ClassLoaderProvider(RemappedMethods.loader));
+            jarMapping.setFallbackInheritanceProvider(provider);
             remapper = new JarRemapper(mapping);
     }
 
@@ -49,6 +55,7 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
         ClassReader reader = new ClassReader(code); // Turn from bytes into visitor
         ClassNode node = new ClassNode();
         reader.accept(node, 0); // Visit using ClassNode
+
         for (MethodNode method : node.methods) { // Taken from SpecialSource
             ListIterator<AbstractInsnNode> insnIterator = method.instructions.iterator();
             while (insnIterator.hasNext()) {
