@@ -16,7 +16,12 @@ public class RemappedMethods {
 
     public static Field getField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
         return inst.getField(Transformer.remapper.mapFieldName(
-                Type.getInternalName(inst), name, null));
+                getName(inst).replace('.', '/'), name, null));
+    }
+
+    public static Field getDeclaredField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
+        return inst.getDeclaredField(Transformer.remapper.mapFieldName(
+                getName(inst).replace('.', '/'), name, null));
     }
 
     public static Method getMethod(Class<?> inst, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
@@ -37,13 +42,27 @@ public class RemappedMethods {
         for (Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
             if (entry.getKey().startsWith(match)) {
                 System.out.println(entry.getValue());
-                return inst.getDeclaredMethod(entry.getValue(), parameterTypes);
+                String[] str = entry.getKey().split("\\s+");
+                int i = 0;
+                boolean failed = false;
+                for (Type type : Type.getArgumentTypes(str[1])) {
+                    if (!type.getClassName().equals(getName(parameterTypes[i]))) {
+                        failed = true;
+                        break;
+                    }
+                }
+                if (!failed)
+                    return inst.getDeclaredMethod(entry.getValue(), parameterTypes);
             }
             //System.out.println(entry.getKey());
         }
         return inst.getDeclaredMethod(name, parameterTypes);
     }
 
+    public static String getSimpleName(Class<?> inst) {
+        String[] name = getName(inst).split("\\.");
+        return name[name.length-1];
+    }
     public static String getName(Class<?> inst) {
         String name = inst.getName();
         //return Transformer.remapper.map(Type.getInternalName(inst)).replace('/', '.');
