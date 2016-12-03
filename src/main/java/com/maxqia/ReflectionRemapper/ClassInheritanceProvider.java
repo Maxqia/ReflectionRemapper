@@ -1,10 +1,10 @@
 package com.maxqia.ReflectionRemapper;
 
+import static com.maxqia.ReflectionRemapper.Utils.reverseMap;
+
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map.Entry;
 
-import org.objectweb.asm.Type;
 import net.md_5.specialsource.provider.InheritanceProvider;
 
 public class ClassInheritanceProvider implements InheritanceProvider {
@@ -18,12 +18,12 @@ public class ClassInheritanceProvider implements InheritanceProvider {
             Class<?> reference = Class.forName(className.replace('/', '.').replace('$', '.'), false, this.getClass().getClassLoader()/*RemappedMethods.loader*/);
             Class<?> extend = reference.getSuperclass();
             if (extend != null) {
-                parents.add(reverseMap(Type.getInternalName(extend)));
+                parents.add(reverseMap(extend));
             }
 
             for (Class<?> inter : reference.getInterfaces()) {
                 if (inter != null) {
-                    parents.add(reverseMap(Type.getInternalName(inter)));
+                    parents.add(reverseMap(inter));
                 }
             }
 
@@ -32,14 +32,6 @@ public class ClassInheritanceProvider implements InheritanceProvider {
             // Empty catch block
         }
         return null;
-    }
-
-    public static String reverseMap(String check) {
-        for (Entry<String, String> entry : Transformer.jarMapping.classes.entrySet()) {
-            if (entry.getValue().equals(check))
-                return entry.getKey();
-        }
-        return check;
     }
 
 }
