@@ -30,12 +30,14 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
      */
     public static void loadMapping(JarMapping mapping) throws IllegalArgumentException {
             if (jarMapping != null) throw new IllegalArgumentException("Already loaded a mapping");
+
+            // Setup forward remapper
             jarMapping = mapping;
             JointProvider provider = new JointProvider();
             provider.add(new ClassInheritanceProvider());
             provider.add(new ClassLoaderProvider(RemappedMethods.loader));
             jarMapping.setFallbackInheritanceProvider(provider);
-            remapper = new JarRemapper(mapping);
+            remapper = new JarRemapper(jarMapping);
     }
 
     /**
@@ -46,6 +48,7 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
         return remapper.remapClassFile(
                 transform(code),
                 RuntimeRepo.getInstance());
+
     }
 
     /**
@@ -91,7 +94,8 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
         if (!(method.owner.equals("java/lang/Package") && method.name.equals("getName")) &&
                 !(method.owner.equals("java/lang/Class") && (method.name.equals("getField") || method.name.equals("getDeclaredField")
                         || method.name.equals("getMethod") || method.name.equals("getDeclaredMethod")
-                        || method.name.equals("getName") || method.name.equals("getSimpleName")))) {
+                        || method.name.equals("getName") || method.name.equals("getSimpleName"))) &&
+                !(method.owner.equals("java/lang/reflect/Field") && method.name.equals("getName"))) {
             return;
         }
 

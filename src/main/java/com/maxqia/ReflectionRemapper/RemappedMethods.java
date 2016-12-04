@@ -6,6 +6,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map.Entry;
 
+import org.objectweb.asm.Type;
+
 public class RemappedMethods {
     public static ClassLoader loader = RemappedMethods.class.getClassLoader();
 
@@ -34,6 +36,23 @@ public class RemappedMethods {
     public static Field getDeclaredField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
         return inst.getDeclaredField(Transformer.remapper.mapFieldName(
                 reverseMap(inst), name, null));
+    }
+
+    public static String getName(Field field) {
+        String name = field.getName();
+        String match = reverseMap(field.getDeclaringClass());
+
+        for (Entry<String, String> entry : Transformer.jarMapping.fields.entrySet()) {
+            if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
+                String[] matched = entry.getKey().split("\\/");
+                String rtr =  matched[matched.length-1];
+                System.out.println(matched[matched.length-1] + " field matched " + name);
+                return rtr;
+            }
+        }
+
+        System.out.println("Could not get field reverse of : " + name);
+        return name;
     }
 
 
