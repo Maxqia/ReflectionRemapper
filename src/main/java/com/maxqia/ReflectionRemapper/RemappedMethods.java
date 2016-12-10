@@ -27,7 +27,7 @@ public class RemappedMethods {
     }
 
 
-    // Fields
+    // Get Fields
     public static Field getField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
         return inst.getField(Transformer.remapper.mapFieldName(
                 reverseMap(inst), name, null));
@@ -38,25 +38,8 @@ public class RemappedMethods {
                 reverseMap(inst), name, null));
     }
 
-    public static String getName(Field field) {
-        String name = field.getName();
-        String match = reverseMap(field.getDeclaringClass());
 
-        for (Entry<String, String> entry : Transformer.jarMapping.fields.entrySet()) {
-            if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
-                String[] matched = entry.getKey().split("\\/");
-                String rtr =  matched[matched.length-1];
-                System.out.println(matched[matched.length-1] + " field matched " + name);
-                return rtr;
-            }
-        }
-
-        System.out.println("Could not get field reverse of : " + name);
-        return name;
-    }
-
-
-    // Methods
+    // Get Methods
     public static Method getMethod(Class<?> inst, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
         try {
             if (inst.getName().equals("net.minecraft.server.MinecraftServer") && name.equals("getServer"))
@@ -77,6 +60,44 @@ public class RemappedMethods {
             e.printStackTrace();
         }
         return inst.getDeclaredMethod(mapMethod(inst, name, parameterTypes), parameterTypes);
+    }
+
+
+    // Field names
+    public static String getName(Field field) {
+        String name = field.getName();
+        String match = reverseMap(field.getDeclaringClass());
+
+        for (Entry<String, String> entry : Transformer.jarMapping.fields.entrySet()) {
+            if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
+                String[] matched = entry.getKey().split("\\/");
+                String rtr =  matched[matched.length-1];
+                System.out.println(matched[matched.length-1] + " field matched " + name);
+                return rtr;
+            }
+        }
+
+        System.out.println("Could not get field reverse of : " + name);
+        return name;
+    }
+
+
+    // Method names
+    public static String getName(Method method) {
+        String name = method.getName();
+        String match = reverseMap(method.getDeclaringClass());
+
+        for (Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
+            if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
+                String[] matched = entry.getKey().split("\\s+")[0].split("\\/");
+                String rtr =  matched[matched.length-1];
+                System.out.println(matched[matched.length-1] + " method matched " + name);
+                return rtr;
+            }
+        }
+
+        System.out.println("Could not get method reverse of : " + name);
+        return name;
     }
 
 

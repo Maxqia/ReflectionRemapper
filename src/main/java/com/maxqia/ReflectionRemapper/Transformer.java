@@ -95,7 +95,8 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
                 !(method.owner.equals("java/lang/Class") && (method.name.equals("getField") || method.name.equals("getDeclaredField")
                         || method.name.equals("getMethod") || method.name.equals("getDeclaredMethod")
                         || method.name.equals("getName") || method.name.equals("getSimpleName"))) &&
-                !(method.owner.equals("java/lang/reflect/Field") && method.name.equals("getName"))) {
+                !(method.owner.equals("java/lang/reflect/Field") && method.name.equals("getName")) &&
+                !(method.owner.equals("java/lang/reflect/Method") && method.name.equals("getName"))) {
             return;
         }
 
