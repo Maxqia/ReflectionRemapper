@@ -37,16 +37,19 @@ public class Utils {
             return result;
         }
 
-        System.out.println("Could not find method : " + name);
+        //System.out.println("Could not find method : " + name);
         return name;
     }
 
+    /**
+     * Recursive method for finding a method from superclasses/interfaces
+     */
     private static String mapMethodInternal(Class<?> inst, String name, Class<?>... parameterTypes) {
         String match = reverseMap(inst) + "/" + name + " ";
 
         for (Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
             if (entry.getKey().startsWith(match)) {
-                System.out.println(entry.getValue());
+                //System.out.println(entry.getValue());
 
                 // Check type to see if it matches
                 String[] str = entry.getKey().split("\\s+");
