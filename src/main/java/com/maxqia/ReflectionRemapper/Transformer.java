@@ -25,12 +25,12 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
     protected static JarRemapper remapper;
 
     /**
-     * Updates the current inheritence provider
+     * Sets the current inheritence provider
      */
-    public static void updateInheritenceProvider() {
+    public static void setInheritenceClassLoader(ClassLoader loader) {
         JointProvider provider = new JointProvider();
         provider.add(new ClassInheritanceProvider());
-        provider.add(new ClassLoaderProvider(RemappedMethods.loader));
+        provider.add(new ClassLoaderProvider(loader));
         jarMapping.setFallbackInheritanceProvider(provider);
     }
 
@@ -43,7 +43,6 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
 
             // Setup forward remapper
             jarMapping = mapping;
-            updateInheritenceProvider();
             remapper = new JarRemapper(jarMapping);
     }
 
@@ -62,7 +61,6 @@ public class Transformer { // This is kinda like RemapperProcessor from SpecialS
      * Convert code from using Class.X methods to our remapped versions
      */
     public static byte[] transform(byte[] code) {
-        updateInheritenceProvider();
         ClassReader reader = new ClassReader(code); // Turn from bytes into visitor
         ClassNode node = new ClassNode();
         reader.accept(node, 0); // Visit using ClassNode

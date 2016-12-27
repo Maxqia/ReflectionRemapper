@@ -7,16 +7,15 @@ import java.util.Map.Entry;
 import static com.maxqia.ReflectionRemapper.Utils.*;
 
 public class RemappedMethods {
-    public static ClassLoader loader = RemappedMethods.class.getClassLoader();
 
     // Classes
     public static Class<?> forName(String className) throws ClassNotFoundException {
-        return forName(className, true, loader);
-    }
+        return forName(className, true, ReflectionUtils.getCallerClassloader());
+    } // Class.forName(String) grabs the caller's classloader, we replicate that
 
     public static Class<?> forName(String className, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
         className = Transformer.remapper.map(className.replace('.', '/')).replace('/', '.');
-        return Class.forName(className, initialize, loader); // always use our {@link #loader}
+        return Class.forName(className, initialize, classLoader);
     }
 
     public static String getSimpleName(Class<?> inst) {
