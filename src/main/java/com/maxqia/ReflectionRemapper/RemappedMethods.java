@@ -1,18 +1,22 @@
 package com.maxqia.ReflectionRemapper;
 
-import static com.maxqia.ReflectionRemapper.Utils.*;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map.Entry;
+
+import static com.maxqia.ReflectionRemapper.Utils.*;
 
 public class RemappedMethods {
     public static ClassLoader loader = RemappedMethods.class.getClassLoader();
 
     // Classes
     public static Class<?> forName(String className) throws ClassNotFoundException {
+        return forName(className, true, loader);
+    }
+
+    public static Class<?> forName(String className, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
         className = Transformer.remapper.map(className.replace('.', '/')).replace('/', '.');
-        return Class.forName(className, true, loader);
+        return Class.forName(className, initialize, loader); // always use our {@link #loader}
     }
 
     public static String getSimpleName(Class<?> inst) {
